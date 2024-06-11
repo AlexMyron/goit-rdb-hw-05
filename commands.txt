@@ -1,0 +1,54 @@
+// p_1
+SELECT 
+	*,
+  (SELECT customer_id FROM orders WHERE orders.id = order_details.order_id) AS customer_id
+FROM 
+  order_details;
+
+// p_2
+SELECT *
+FROM order_details
+WHERE id IN (
+	SELECT shipper_id
+    FROM orders
+    WHERE shipper_id > 3
+);
+
+// p_3
+SELECT order_id, AVG(quantity) AS average_quantity
+FROM (
+	SELECT * 
+    FROM order_details 
+    WHERE quantity > 10
+    ) AS quantity_list
+GROUP BY order_id;
+
+// p_4
+WITH QuantityList AS (
+	SELECT * 
+    FROM order_details 
+    WHERE quantity > 10
+)
+
+SELECT order_id, AVG(quantity) AS average_quantity
+FROM QuantityList
+GROUP BY order_id;
+
+// p_5
+DROP FUNCTION IF EXISTS DivideNumbers;
+
+DELIMITER //
+CREATE FUNCTION DivideNumbers (number_1 FLOAT, number_2 FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+NO SQL
+BEGIN
+	DECLARE result FLOAT;
+    SET result = number_1 / number_2;
+    RETURN result;
+END //
+DELIMITER ;
+
+SELECT order_id, quantity, DivideNumbers(quantity, 2) AS half_quantity
+FROM order_details;
+
